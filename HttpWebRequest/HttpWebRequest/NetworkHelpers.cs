@@ -21,22 +21,14 @@ namespace nanoFramework.Networking
         static public ManualResetEvent IpAddressAvailable = new ManualResetEvent(false);
         static public ManualResetEvent DateTimeAvailable = new ManualResetEvent(false);
 
-        private static NetworkInterface m_NetworkInterface = null;
+        private static NetworkInterface m_NetworkInterfaces_Wifi = null;
+        private static NetworkInterface m_NetworkInterfaces_Lan = null;
 
 
-        internal void SetupAndConnectNetwork(bool requiresDateTime = false)
+        internal void SetupAndConnectNetwork(bool requiresDateTime = true)
         {
-
-            Console.WriteLine($"Sntp.Server1:{Sntp.Server1}");
-            Console.WriteLine($"Sntp.Server2:{Sntp.Server2}");
-
-            //Sntp.Server1 = "10.10.10.10";
-            //Sntp.Server2 = "10.10.10.10";
-
-            Console.WriteLine($"Sntp.Server1:{Sntp.Server1}");
-            Console.WriteLine($"Sntp.Server2:{Sntp.Server2}");
-
-
+            Sntp.Server1 = "0.de.pool.ntp.org";
+            Sntp.Server2 = "1.de.pool.ntp.org";
             NetworkChange.NetworkAddressChanged += AddressChangedCallback;
             NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
 
@@ -59,43 +51,46 @@ namespace nanoFramework.Networking
 
                 foreach (var n in nis)
                 {
+                    if (n.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                    //if (n.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
+                    {
+                        Console.WriteLine("Network connection is: Ethernet");
+
+                        n.EnableAutomaticDns();
+                        n.EnableDhcp();
+                        //n.EnableStaticIPv4("10.10.10.131", "255.255.255.0", "10.10.10.1");
+
+                        m_NetworkInterfaces_Lan = n;
+                    }
+
                     if (n.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
                     {
-                        m_NetworkInterface = n;
-                        break;
+                        Console.WriteLine("Network connection is: Wi-Fi");
+                        Wireless80211Configuration wc = Wireless80211Configuration.GetAllWireless80211Configurations()[n.SpecificConfigId];
+                        Console.WriteLine($"Ssid:{wc.Ssid},Encryption:{wc.Encryption},Password:{wc.Password},Authentication:{wc.Authentication}");
+
+                        wc.Authentication = AuthenticationType.WPA2;
+                        wc.Encryption = EncryptionType.WPA2_PSK;
+                        wc.Ssid = c_SSID;
+                        wc.Password = c_AP_PASSWORD;
+
+                        //wc.Ssid = "";
+                        //wc.Password = "";
+
+                        wc.SaveConfiguration();
+
+                        //n.EnableStaticIPv4("192.168.0.250", "255.255.255.0", "192.168.0.1");
+                        n.EnableAutomaticDns();
+                        n.EnableDhcp();
+
+                        m_NetworkInterfaces_Wifi = n;
                     }
                 }
 
-                if (m_NetworkInterface == null) throw new NotSupportedException("ERROR: there is no network interface configured.\r\nOpen the 'Edit Network Configuration' in Device Explorer and configure one.");
-
-                if (m_NetworkInterface.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
-                {
-                    // network interface is Wi-Fi
-                    Console.WriteLine("Network connection is: Wi-Fi");
-
-                    Wireless80211Configuration wc = Wireless80211Configuration.GetAllWireless80211Configurations()[m_NetworkInterface.SpecificConfigId];
-
-                    Console.WriteLine($"Ssid:{wc.Ssid},Encryption:{wc.Encryption},Password:{wc.Password},Authentication:{wc.Authentication}");
-
-                    wc.Authentication = AuthenticationType.WPA2;
-                    wc.Encryption = EncryptionType.WPA2_PSK;
-                    wc.Ssid = c_SSID;
-                    wc.Password = c_AP_PASSWORD;
-                    wc.SaveConfiguration();
-                    // Wi-Fi configuration matches
-                    // (or can't be validated)
-                }
-                else
-                {
-                    // network interface is Ethernet
-                    Console.WriteLine("Network connection is: Ethernet");
-                }
-
-                m_NetworkInterface.EnableAutomaticDns();
-                m_NetworkInterface.EnableDhcp();
+                if (m_NetworkInterfaces_Lan == null && m_NetworkInterfaces_Wifi == null) throw new NotSupportedException("ERROR: there is no network interface configured.\r\nOpen the 'Edit Network Configuration' in Device Explorer and configure one.");
 
                 // check if we have an IP
-                CheckIPThread();
+                CheckIP();
 
                 if (_requiresDateTime)
                 {
@@ -112,8 +107,6 @@ namespace nanoFramework.Networking
 
         private static void SetDateTime()
         {
-
-
             int retryCount = 30;
 
             Console.WriteLine("Waiting for a valid date & time...");
@@ -142,34 +135,29 @@ namespace nanoFramework.Networking
             DateTimeAvailable.Set();
         }
 
-        private static void CheckIPThread()
-        {
-            Thread t = new Thread(CheckIP);
-            t.Start();
-        }
 
         private static void CheckIP()
         {
-            bool proceed = true;
-            int counter = 0;
-            do
-            {
-                Console.WriteLine($"Checking for IP {counter}");
+            Console.WriteLine($"Checking for IP ");
+            bool found = false;
+            found = found | CheckIpByInterface(m_NetworkInterfaces_Lan);
+            found = found | CheckIpByInterface(m_NetworkInterfaces_Wifi);
 
-                NetworkInterface ni = m_NetworkInterface;
-                if (ni.IPv4Address != null && ni.IPv4Address.Length > 0)
+            Thread.Sleep(2000);
+            if (found) IpAddressAvailable.Set();
+        }
+
+        private static bool CheckIpByInterface(NetworkInterface ni)
+        {
+            if (ni != null && ni.IPv4Address != null && ni.IPv4Address.Length > 0)
+            {
+                if (ni.IPv4Address[0] != '0')
                 {
-                    if (ni.IPv4Address[0] != '0')
-                    {
-                        Console.WriteLine($"We have and IP: {ni.IPv4Address}");
-                        IpAddressAvailable.Set();
-                        proceed = false;
-                    }
+                    Console.WriteLine($"We have an IP: {ni.IPv4Address}");
+                    return true;
                 }
-                Thread.Sleep(2000);
-                counter++;
             }
-            while (proceed);
+            return false;
         }
 
         private static void AddressChangedCallback(object sender, EventArgs e)
