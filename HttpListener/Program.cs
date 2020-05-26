@@ -31,13 +31,14 @@ namespace HttpSamples.HttpListenerSample
 
             Thread.Sleep(2000);
 
-            // Create a listener.
             string prefix = "http";
             int port = 80;
 
             Console.WriteLine("* Creating Http Listener: " + prefix + " on port " + port);
             HttpListener listener = new HttpListener(prefix, port);
+            // Start Listener 
             listener.Start();
+            // After Starting, several exceptions are thrown
 
             string ips = $"{NetworkInterface.GetAllNetworkInterfaces()[0].IPv4Address}, {NetworkInterface.GetAllNetworkInterfaces()[1].IPv4Address}, {NetworkInterface.GetAllNetworkInterfaces()[2].IPv4Address}";
             Console.WriteLine($"Listening for HTTP requests @ {ips}:{port} ...");
