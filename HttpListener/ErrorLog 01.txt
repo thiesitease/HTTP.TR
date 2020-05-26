@@ -1,0 +1,82 @@
+Call of: 
+listener.Start(); 
+in Program.cs, Line 40
+
+
+Network availability changed
+* Creating Http Listener: http on port 80
+    ++++ Exception System.Net.Sockets.SocketException - CLR_E_FAIL (5) ++++
+    ++++ Message: 
+    ++++ System.Net.Sockets.NativeSocket::poll [IP: 0000] ++++
+    ++++ System.Net.Sockets.Socket::Poll [IP: 0011] ++++
+    ++++ System.Net.Sockets.Socket::Accept [IP: 0017] ++++
+Network availability changed
+    ++++ Exception System.Net.Sockets.SocketException - CLR_E_FAIL (5) ++++
+    ++++ Message: 
+    ++++ System.Net.Sockets.NativeSocket::poll [IP: 0000] ++++
+    ++++ System.Net.Sockets.Socket::Poll [IP: 0011] ++++
+    ++++ System.Net.Sockets.Socket::Accept [IP: 0017] ++++
+Network availability changed
+    ++++ Exception System.Net.Sockets.SocketException - CLR_E_FAIL (5) ++++
+    ++++ Message: 
+    ++++ System.Net.Sockets.NativeSocket::poll [IP: 0000] ++++
+    ++++ System.Net.Sockets.Socket::Poll [IP: 0011] ++++
+    ++++ System.Net.Sockets.Socket::Accept [IP: 0017] ++++
+Network availability changed
+    ++++ Exception System.Net.Sockets.SocketException - CLR_E_FAIL (5) ++++
+    ++++ Message: 
+    ++++ System.Net.Sockets.NativeSocket::poll [IP: 0000] ++++
+    ++++ System.Net.Sockets.Socket::Poll [IP: 0011] ++++
+    ++++ System.Net.Sockets.Socket::Accept [IP: 0017] ++++
+Network availability changed
+    ++++ Exception System.Net.Sockets.SocketException - CLR_E_FAIL (5) ++++
+    ++++ Message: 
+    ++++ System.Net.Sockets.NativeSocket::poll [IP: 0000] ++++
+    ++++ System.Net.Sockets.Socket::Poll [IP: 0011] ++++
+    ++++ System.Net.Sockets.Socket::Accept [IP: 0017] ++++
+Network availability changed
+    ++++ Exception System.Net.Sockets.SocketException - CLR_E_FAIL (5) ++++
+    ++++ Message: 
+    ++++ System.Net.Sockets.NativeSocket::poll [IP: 0000] ++++
+    ++++ System.Net.Sockets.Socket::Poll [IP: 0011] ++++
+    ++++ System.Net.Sockets.Socket::Accept [IP: 0017] ++++
+Network availability changed
+Listening for HTTP requests @ 0.0.0.0, 0.0.0.0, 10.10.10.232:80 ...
+Der Thread '<Kein Name>' (0x5) hat mit Code 0 (0x0) geendet.
+    ++++ Exception System.InvalidOperationException - 0x00000000 (1) ++++
+    ++++ Message: 
+    ++++ System.Net.HttpListener::GetContext [IP: 001c] ++++
+    ++++ HttpSamples.HttpListenerSample.Program::Main [IP: 00ae] ++++
+Network availability changed
+
+
+Call of: 
+HttpListenerContext context = listener.GetContext();
+in Program.cs, Line 51
+
+Ausnahme ausgelöst: "System.InvalidOperationException" in System.Net.Http.dll
+Network availability changed
+* Error getting context: Exception was thrown: System.InvalidOperationException
+Sack = System.Net.HttpListener::GetContext
+HttpSamples.HttpListenerSample.Program::Main
+
+    ++++ Exception System.InvalidOperationException - 0x00000000 (1) ++++
+    ++++ Message: 
+    ++++ System.Net.HttpListener::GetContext [IP: 001c] ++++
+    ++++ HttpSamples.HttpListenerSample.Program::Main [IP: 00ae] ++++
+Ausnahme ausgelöst: "System.InvalidOperationException" in System.Net.Http.dll
+Network availability changed
+* Error getting context: Exception was thrown: System.InvalidOperationException
+Sack = System.Net.HttpListener::GetContext
+HttpSamples.HttpListenerSample.Program::Main
+
+    ++++ Exception System.InvalidOperationException - 0x00000000 (1) ++++
+    ++++ Message: 
+    ++++ System.Net.HttpListener::GetContext [IP: 001c] ++++
+    ++++ HttpSamples.HttpListenerSample.Program::Main [IP: 00ae] ++++
+Network availability changed
+Ausnahme ausgelöst: "System.InvalidOperationException" in System.Net.Http.dll
+Network availability changed
+* Error getting context: Exception was thrown: System.InvalidOperationException
+Sack = System.Net.HttpListener::GetContext
+HttpSamples.HttpListenerSample.Program::Main

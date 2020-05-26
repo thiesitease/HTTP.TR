@@ -52,7 +52,9 @@ namespace HttpSamples.HttpListenerSample
                     if (context != null)
                     {
                         string url = context.Request.Url.OriginalString;
-                        string responseString = $"<HTML><BODY>Hello world! This is nanoFramework.<br/>{DateTime.UtcNow.ToString()}<br/>{url}<br/>{ips}</BODY></HTML>";
+                        string remoteHost = context.Request.RemoteEndPoint.Address.ToString();
+                        string responseString = $"<HTML><BODY>Hello world! This is nanoFramework.<br/>CurrentTime:{DateTime.UtcNow.ToString()}<br/>Requested URL:{url}<br/>RemoteHost: {remoteHost}<br/>Server IPs:{ips}</BODY></HTML>";
+                        Console.WriteLine($"Request received: {responseString}");
                         byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
 
                         // Get the response stream and write the response content to it
