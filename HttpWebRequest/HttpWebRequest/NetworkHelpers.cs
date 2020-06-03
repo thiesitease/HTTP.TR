@@ -38,7 +38,16 @@ namespace nanoFramework.Networking
 
         private static void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
         {
-            Console.WriteLine("Network availability changed");
+            if (sender != null)
+            {
+                Console.WriteLine($"Network availability changed. sender.GetType: {sender.GetType()}");
+
+                if(sender is UInt16 number)
+                {
+                    Console.WriteLine($"Network availability changed. sender: {number}");
+                }
+            }
+            Console.WriteLine($"Network availability changed. IsAvailable: {e.IsAvailable}");
         }
 
         internal static void WorkingThread()

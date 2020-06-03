@@ -4,16 +4,20 @@
 //
 
 using nanoFramework.Runtime.Events;
+
 using System;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace nanoFramework.Networking
 {
     public class NetworkHelpers
     {
-        private const string c_SSID = "gemelo-tr";
-        private const string c_AP_PASSWORD = "1234567890";
+        private const bool DisableWifi = true;
+
+        private const string c_SSID = "power";
+        private const string c_AP_PASSWORD = "2349870983475098745232451989789";
 
         private static bool _requiresDateTime;
 
@@ -37,7 +41,7 @@ namespace nanoFramework.Networking
 
         private static void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
         {
-            Console.WriteLine("Network availability changed");
+            Console.WriteLine($"Network availability changed. IsAvailable: {e.IsAvailable}");
         }
 
         internal static void WorkingThread()
@@ -51,7 +55,6 @@ namespace nanoFramework.Networking
                 foreach (var n in nis)
                 {
                     if (n.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
-                    //if (n.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
                     {
                         Console.WriteLine("Network connection is: Ethernet");
 
@@ -64,25 +67,47 @@ namespace nanoFramework.Networking
 
                     if (n.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
                     {
-                        Console.WriteLine("Network connection is: Wi-Fi");
-                        Wireless80211Configuration wc = Wireless80211Configuration.GetAllWireless80211Configurations()[n.SpecificConfigId];
-                        Console.WriteLine($"Ssid:{wc.Ssid},Encryption:{wc.Encryption},Password:{wc.Password},Authentication:{wc.Authentication}");
+                        if (DisableWifi)
+                        {
+                            Console.WriteLine("Found Network connection is: Wi-Fi. Disable active");
+                            Wireless80211Configuration wc = Wireless80211Configuration.GetAllWireless80211Configurations()[n.SpecificConfigId];
+                            Console.WriteLine($"Options:{wc.Options}");
+                            if (wc.Options != Wireless80211Configuration.ConfigurationOptions.None)
+                            {
+                                Console.WriteLine("Found Network connection is: Wi-Fi. Disabling it.");
+                                wc.Options = Wireless80211Configuration.ConfigurationOptions.None;
+                                wc.SaveConfiguration();
+                            }
+                            n.EnableAutomaticDns();
+                            n.EnableDhcp();
 
-                        wc.Authentication = AuthenticationType.WPA2;
-                        wc.Encryption = EncryptionType.WPA2_PSK;
-                        wc.Ssid = c_SSID;
-                        wc.Password = c_AP_PASSWORD;
+                            // Reboot nötig nach dem Abschalten von Wifi
+                        }
+                        else
+                        {
+                            Console.WriteLine("Network connection is: Wi-Fi");
+                            Wireless80211Configuration wc = Wireless80211Configuration.GetAllWireless80211Configurations()[n.SpecificConfigId];
+                            Console.WriteLine($"Ssid:{wc.Ssid},Encryption:{wc.Encryption},Password:{wc.Password},Authentication:{wc.Authentication}");
+                            Console.WriteLine($"Options:{wc.Options}");
 
-                        //wc.Ssid = "";
-                        //wc.Password = "";
+                            wc.Options = Wireless80211Configuration.ConfigurationOptions.AutoConnect | Wireless80211Configuration.ConfigurationOptions.Enable;
 
-                        wc.SaveConfiguration();
+                            wc.Authentication = AuthenticationType.WPA2;
+                            wc.Encryption = EncryptionType.WPA2_PSK;
+                            wc.Ssid = c_SSID;
+                            wc.Password = c_AP_PASSWORD;
 
-                        //n.EnableStaticIPv4("192.168.0.250", "255.255.255.0", "192.168.0.1");
-                        n.EnableAutomaticDns();
-                        n.EnableDhcp();
+                            //wc.Ssid = "";
+                            //wc.Password = "";
 
-                        m_NetworkInterfaces_Wifi = n;
+                            wc.SaveConfiguration();
+
+                            //n.EnableStaticIPv4("192.168.0.250", "255.255.255.0", "192.168.0.1");
+                            n.EnableAutomaticDns();
+                            n.EnableDhcp();
+
+                            m_NetworkInterfaces_Wifi = n;
+                        }
                     }
                 }
 
@@ -141,7 +166,7 @@ namespace nanoFramework.Networking
             bool found = false;
             found = found | CheckIpByInterface(m_NetworkInterfaces_Lan);
             found = found | CheckIpByInterface(m_NetworkInterfaces_Wifi);
-            
+
             Thread.Sleep(2000);
             if (found) IpAddressAvailable.Set();
         }
